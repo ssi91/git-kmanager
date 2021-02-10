@@ -1,3 +1,7 @@
-class Config:
-    def get(self, key, default=None):
-        pass
+Config = {
+    'credentials': {
+        'username': '',
+        'token': ''
+    },
+    'ssh-key-path': None
+}
