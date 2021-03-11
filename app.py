@@ -16,15 +16,14 @@ clone_path = os.environ.get('CLONE_PATH')
 
 
 def _repo_form_origin(origin: str):
-    # TODO: test that!
-    return origin[origin.rfind('/'):origin.rfind('.')]
+    return origin[origin.rfind('/') + 1:origin.rfind('.')]
 
 
 @app.route(URL_PREFIX + '/clone/', methods=('POST',))
 def create_clone():
     data = request.json
     origin_repository = data['origin']
-    repository_name = data['repository'] or _repo_form_origin(origin_repository)
+    repository_name = data.get('repository') or _repo_form_origin(origin_repository)
     org_name = data.get('org_name', config.get('org_name'))
     with GitCLIClient(config.get('ssh-key-path'), clone_path) as git_cli:
         git_cli.clone(origin_repository)
