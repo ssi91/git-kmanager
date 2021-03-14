@@ -28,7 +28,13 @@ def create_clone():
     with GitCLIClient(config.get('ssh-key-path'), clone_path) as git_cli:
         git_cli.clone(origin_repository)
         gh_client = GitHubOrgAPIClient(org_name, config.get('credentials'))
-        response = gh_client.create_repository(name=repository_name)
+        status_code, response = gh_client.create_repository(name=repository_name)
+        status = None
+        if status_code == 201:
+            status = 'Created'
+        if status_code == 422:
+            status_code, response = gh_client.get_repository(repository_name)
+            status = 'Updated'
         ssh_url = response['ssh_url']
         os.chdir(f'{clone_path}/{repository_name}')
         git_cli.push(ssh_url, 'master')  # TODO: use actual default branch

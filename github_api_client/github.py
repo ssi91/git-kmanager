@@ -47,13 +47,19 @@ class GitHubOrgAPIClient:
 
         response_data = response.json()
 
-        return response_data
+        return response.status_code, response_data
 
     def get_repositories(self, **kwargs):
         return self._request(
             'get',
             f'{self.BASE_URL}{self.api_url_pattern.format(org=self._org_name, resource="repos")}',
             query_params=kwargs
+        )
+
+    def get_repository(self, name,  **kwargs):
+        return self._request(
+            'get',
+            f'{self.BASE_URL}/repos/{self._org_name}/{name}'
         )
 
     def create_repository(self, **kwargs):
