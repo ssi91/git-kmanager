@@ -26,7 +26,11 @@ def create_clone():
     repository_name = data.get('repository') or _repo_form_origin(origin_repository)
     org_name = data.get('org_name', config.get('org_name'))
     with GitCLIClient(config.get('ssh-key-path'), clone_path) as git_cli:
-        git_cli.clone(origin_repository)
+        clone_response = git_cli.clone(origin_repository)
+        if not clone_response['success']:
+            # TODO: add logging
+            # TODO implement git pull
+            pass
         gh_client = GitHubOrgAPIClient(org_name, config.get('credentials'))
         status_code, response = gh_client.create_repository(name=repository_name)
         status = None
@@ -37,6 +41,12 @@ def create_clone():
             status = 'Updated'
         ssh_url = response['ssh_url']
         os.chdir(f'{clone_path}/{repository_name}')
-        git_cli.push(ssh_url, 'master')  # TODO: use actual default branch
+        branch_response = git_cli.branch()
+        main_branch = branch_response['result'][0]  # TODO: check the status
+        git_cli.push(ssh_url, main_branch)
 
-    return 'success'
+    return {
+        'status': status,
+        'repository': {},
+        'msg': ''
+    }
